@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JX金属(5016) デイトレ記録</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;font-size:14px;line-height:1.6}
+.container{max-width:800px;margin:0 auto;padding:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 16px;border-bottom:1px solid #21262d;margin-bottom:16px}
+.topbar-title{font-size:16px;font-weight:600;color:#e6edf3}
+.topbar-sub{font-size:12px;color:#8b949e;margin-top:2px}
+.topbar-updated{font-size:12px;color:#8b949e}
+.tab-bar{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #21262d}
+.tab{font-size:13px;padding:8px 16px;border:none;background:none;color:#8b949e;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
+.tab:hover{color:#e6edf3}
+.tab.active{color:#e6edf3;border-bottom-color:#f78166}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.metric{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:14px 16px}
+.metric-label{font-size:11px;color:#8b949e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.metric-value{font-size:24px;font-weight:600}
+.pos{color:#3fb950}
+.neg{color:#f85149}
+.neutral{color:#e6edf3}
+.card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px;margin-bottom:16px}
+.section-label{font-size:11px;font-weight:600;color:#8b949e;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.ref-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #21262d}
+.ref-item:last-child{border-bottom:none}
+.ref-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ref-title{font-size:11px;font-weight:600;color:#8b949e;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.ref-text{font-size:13px;color:#e6edf3;line-height:1.65}
+.trade-table{width:100%;border-collapse:collapse;font-size:13px}
+.trade-table th{text-align:left;padding:8px 10px;color:#8b949e;font-weight:500;border-bottom:1px solid #21262d;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.trade-table td{padding:10px;border-bottom:1px solid #21262d}
+.trade-table tr:last-child td{border-bottom:none}
+.trade-table tr:hover td{background:#1c2128}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:500}
+.badge-buy{background:#1f4b3a;color:#3fb950}
+.badge-sell{background:#4b1f1f;color:#f85149}
+.badge-violation{background:#4b3a1f;color:#d29922;font-size:10px;padding:1px 6px}
+.pattern-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #21262d}
+.pattern-item:last-child{border-bottom:none}
+.pattern-num{font-size:11px;font-weight:600;background:#1f4b3a;color:#3fb950;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pattern-text{font-size:13px;color:#e6edf3;line-height:1.6}
+.belief-box{background:#1c2128;border-left:3px solid #f78166;border-radius:0 8px 8px 0;padding:14px 16px;font-size:13px;line-height:1.75;color:#e6edf3;margin-bottom:16px}
+.proof-box{background:#1c2128;border:1px solid #21262d;border-radius:8px;padding:12px 16px;font-size:13px;color:#8b949e;margin-bottom:16px}
+.forbidden-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #21262d;font-size:13px;color:#e6edf3}
+.forbidden-item:last-child{border-bottom:none}
+.x-mark{color:#f85149;font-weight:700;font-size:16px}
+.hidden{display:none}
+.chart-wrap{position:relative;height:180px;margin-top:4px}
+.expand-btn{font-size:12px;color:#8b949e;background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline}
+.expand-content{margin-top:10px;font-size:13px;color:#8b949e;line-height:1.65;display:none}
+.rule-badge{display:inline-block;font-size:10px;padding:1px 7px;border-radius:10px;margin-left:6px}
+.rule-ok{background:#1f4b3a;color:#3fb950}
+.rule-ng{background:#4b1f1f;color:#f85149}
+@media(max-width:600px){
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .trade-table th:nth-child(3),.trade-table td:nth-child(3),
+  .trade-table th:nth-child(4),.trade-table td:nth-child(4){display:none}
+  .tab{padding:8px 10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">JX金属(5016) デイトレ記録</div>
+      <div class="topbar-sub" id="topbar-month"></div>
+    </div>
+    <div class="topbar-updated" id="topbar-updated"></div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="sw('morning',this)">朝の確認</button>
+    <button class="tab" onclick="sw('stats',this)">統計</button>
+    <button class="tab" onclick="sw('trades',this)">取引一覧</button>
+    <button class="tab" onclick="sw('belief',this)">信条</button>
+  </div>
+
+  <!-- 朝の確認 -->
+  <div id="tab-morning">
+    <div class="section-label">前回の振り返り</div>
+    <div class="card" id="ref-card">
+      <div style="font-size:12px;color:#8b949e;margin-bottom:14px" id="ref-date"></div>
+      <div class="ref-item">
+        <div class="ref-icon">🎯</div>
+        <div><div class="ref-title">明日への意識</div><div class="ref-text" id="ref-tomorrow"></div></div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-icon">💡</div>
+        <div><div class="ref-title">気づき・思考の変化</div><div class="ref-text" id="ref-insight"></div></div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-icon">🔍</div>
+        <div><div class="ref-title">行動パターンの観察</div><div class="ref-text" id="ref-behavior"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">★成功エントリーパターン</div>
+    <div class="card" id="pattern-card"></div>
+
+    <div class="section-label">今月サマリー</div>
+    <div class="metric-grid" id="summary-morning"></div>
+  </div>
+
+  <!-- 統計 -->
+  <div id="tab-stats" class="hidden">
+    <div class="section-label">月次統計</div>
+    <div class="metric-grid" id="summary-stats"></div>
+
+    <div class="section-label" style="margin-top:4px">累計純損益推移</div>
+    <div class="card"><div class="chart-wrap"><canvas id="pnl-chart"></canvas></div></div>
+
+    <div class="section-label">ルール遵守チェック</div>
+    <div class="card" id="rule-check"></div>
+  </div>
+
+  <!-- 取引一覧 -->
+  <div id="tab-trades" class="hidden">
+    <div class="section-label">取引記録</div>
+    <div class="card" style="padding:0;overflow:auto">
+      <table class="trade-table">
+        <thead><tr>
+          <th>日付</th><th>方向</th><th>株数</th><th>IN</th><th>OUT</th><th>純損益</th>
+        </tr></thead>
+        <tbody id="trade-tbody"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px" id="trade-detail"></div>
+  </div>
+
+  <!-- 信条 -->
+  <div id="tab-belief" class="hidden">
+    <div class="section-label">トレード信条</div>
+    <div class="belief-box" id="belief-body"></div>
+    <div class="proof-box" id="belief-proof"></div>
+
+    <div class="section-label">禁止事項</div>
+    <div class="card" id="forbidden-list"></div>
+  </div>
+</div>
+
+<script>
+let D={};
+let chartInst=null;
+
+fetch('data.json?t='+Date.now())
+  .then(r=>r.json())
+  .then(d=>{D=d;init();})
+  .catch(()=>alert('data.jsonの読み込みに失敗しました'));
+
+function init(){
+  document.getElementById('topbar-month').textContent=D.summary.month;
+  document.getElementById('topbar-updated').textContent='最終更新 '+D.meta.last_updated;
+  renderMorning();
+  renderBelief();
+}
+
+function renderMorning(){
+  const refs=D.reflections;
+  const last=refs[refs.length-1];
+  document.getElementById('ref-date').textContent=last.date+'の振り返り';
+  document.getElementById('ref-tomorrow').textContent=last.tomorrow;
+  document.getElementById('ref-insight').textContent=last.insight;
+  document.getElementById('ref-behavior').textContent=last.behavior;
+
+  const pc=document.getElementById('pattern-card');
+  pc.innerHTML=D.success_pattern.steps.map((s,i)=>`
+    <div class="pattern-item">
+      <div class="pattern-num">${i+1}</div>
+      <div class="pattern-text">${s}</div>
+    </div>`).join('');
+
+  renderSummary('summary-morning');
+}
+
+function renderSummary(id){
+  const s=D.summary;
+  const sign=s.net_pnl>=0?'+':'';
+  const cls=s.net_pnl>=0?'pos':'neg';
+  const wr=Math.round(s.win_rate*100);
+  document.getElementById(id).innerHTML=`
+    <div class="metric"><div class="metric-label">取引数</div><div class="metric-value neutral">${s.count}</div></div>
+    <div class="metric"><div class="metric-label">勝率</div><div class="metric-value ${wr>=50?'pos':'neg'}">${wr}%</div></div>
+    <div class="metric"><div class="metric-label">純損益</div><div class="metric-value ${cls}">${sign}${s.net_pnl.toLocaleString()}円</div></div>
+    <div class="metric"><div class="metric-label">勝/負</div><div class="metric-value neutral">${s.wins} / ${s.losses}</div></div>`;
+}
+
+function renderStats(){
+  renderSummary('summary-stats');
+
+  if(chartInst) chartInst.destroy();
+  let cum=0;
+  const labels=D.trades.map(t=>t.date.replace('2026/0','').replace('2026/',''));
+  const data=D.trades.map(t=>{cum+=t.net_pnl;return cum;});
+  const colors=data.map(v=>v>=0?'#3fb950':'#f85149');
+  chartInst=new Chart(document.getElementById('pnl-chart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{
+      label:'累計純損益',data,
+      borderColor:'#8b949e',
+      backgroundColor:'rgba(139,148,158,.08)',
+      fill:true,tension:.3,
+      pointRadius:6,
+      pointBackgroundColor:colors,
+      pointBorderColor:colors
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#8b949e',font:{size:11}},grid:{color:'#21262d'}},
+        y:{ticks:{color:'#8b949e',font:{size:11},callback:v=>v.toLocaleString()+'円'},grid:{color:'#21262d'}}
+      }
+    }
+  });
+
+  const rc=document.getElementById('rule-check');
+  rc.innerHTML=D.trades.map(t=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #21262d">
+      <span style="color:#8b949e;font-size:13px">${t.date.replace('2026/0','')}</span>
+      <span style="font-size:13px;color:#e6edf3;flex:1;margin:0 12px">${t.direction} ${t.qty}株</span>
+      <span class="rule-badge ${t.rule_violation?'rule-ng':'rule-ok'}">${t.rule_violation?'ルール違反':'遵守'}</span>
+    </div>`).join('').replace(/border-bottom[^;]+;(?=[^<]*<\/div>\s*$)/,'');
+}
+
+function renderTrades(){
+  const tb=document.getElementById('trade-tbody');
+  tb.innerHTML=D.trades.map((t,i)=>`
+    <tr onclick="toggleDetail(${i})" style="cursor:pointer">
+      <td style="color:#8b949e">${t.date.replace('2026/0','')}</td>
+      <td><span class="badge ${t.direction.includes('売')?'badge-sell':'badge-buy'}">${t.direction}</span></td>
+      <td>${t.qty.toLocaleString()}</td>
+      <td>${t.entry.toLocaleString()}</td>
+      <td>${t.exit.toLocaleString()}</td>
+      <td class="${t.net_pnl>=0?'pos':'neg'}">${t.net_pnl>=0?'+':''}${t.net_pnl.toLocaleString()}円</td>
+    </tr>`).join('');
+
+  const dd=document.getElementById('trade-detail');
+  dd.innerHTML=D.trades.map((t,i)=>`
+    <div id="detail-${i}" class="card hidden" style="margin-bottom:12px">
+      <div style="font-size:12px;color:#8b949e;margin-bottom:10px">${t.date} ${t.direction} ${t.qty}株 ${t.rule_violation?'<span class="badge badge-violation">ルール違反あり</span>':''}</div>
+      <div style="margin-bottom:8px"><span style="color:#8b949e;font-size:11px">エントリー根拠</span><div style="font-size:13px;margin-top:4px">${t.entry_reason}</div></div>
+      <div style="margin-bottom:8px"><span style="color:#8b949e;font-size:11px">良かった点</span><div style="font-size:13px;margin-top:4px;color:#3fb950">${t.good}</div></div>
+      <div style="margin-bottom:8px"><span style="color:#8b949e;font-size:11px">反省点</span><div style="font-size:13px;margin-top:4px;color:#f85149">${t.bad}</div></div>
+      <div><span style="color:#8b949e;font-size:11px">翌日への意識</span><div style="font-size:13px;margin-top:4px">${t.tomorrow}</div></div>
+    </div>`).join('');
+}
+
+function toggleDetail(i){
+  const el=document.getElementById('detail-'+i);
+  el.classList.toggle('hidden');
+}
+
+function renderBelief(){
+  const b=D.belief;
+  document.getElementById('belief-body').innerHTML=`<strong>${b.title}</strong><br><br>${b.body}`;
+  document.getElementById('belief-proof').textContent=b.proof;
+  document.getElementById('forbidden-list').innerHTML=b.forbidden.map(f=>`
+    <div class="forbidden-item"><span class="x-mark">✕</span><span>${f}</span></div>`).join('');
+}
+
+function sw(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['morning','stats','trades','belief'].forEach(n=>{
+    document.getElementById('tab-'+n).classList.toggle('hidden',n!==name);
+  });
+  if(name==='stats') setTimeout(renderStats,50);
+  if(name==='trades') renderTrades();
+}
+</script>
+</body>
+</html>
