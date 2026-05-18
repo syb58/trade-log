@@ -166,8 +166,6 @@ function init(){
 
 function renderMorning(){
   const refs=D.reflections;
-  const last=refs[refs.length-1];
-  const refs=D.reflections;
   const sel=document.getElementById('ref-selector');
   sel.innerHTML=[...refs].reverse().map(r=>`<option value="${r.date}">${r.date.replace('2026/','')}</option>`).join('');
   renderReflection(refs[refs.length-1].date);
